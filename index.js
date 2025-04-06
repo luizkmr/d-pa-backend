@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import { gerarDiagnostico } from './services/openaiAgent.js'
 
 dotenv.config()
 
@@ -10,14 +11,21 @@ const PORT = process.env.PORT || 3000
 app.use(cors())
 app.use(express.json())
 
-// Teste básico
+// Rota de teste
 app.get('/', (req, res) => {
   res.send('🧠 D-PA Backend ativo!')
 })
 
-// Rota de análise (vamos implementar depois)
+// Rota que envia dados para a IA
 app.post('/analyze', async (req, res) => {
-  res.json({ message: 'Rota de análise recebida. Agente IA em construção.' })
+  try {
+    const dadosFormulario = req.body
+    const respostaIA = await gerarDiagnostico(dadosFormulario)
+    res.status(200).json({ resultado: respostaIA })
+  } catch (error) {
+    console.error('Erro ao gerar diagnóstico:', error)
+    res.status(500).json({ erro: 'Falha ao processar análise com IA' })
+  }
 })
 
 app.listen(PORT, () => {
